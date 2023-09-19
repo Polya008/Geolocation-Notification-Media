@@ -19,31 +19,31 @@ let longitude;
 
 const posts = [];
 
-//!Серверную часть и загрузку также реализовывать не нужно, храните всё в памяти
+//! Серверную часть и загрузку также реализовывать не нужно, храните всё в памяти
 function save(arr) {
-	localStorage.editorData = JSON.stringify({
-		arr,
-	});
+  localStorage.editorData = JSON.stringify({
+    arr,
+  });
 }
 
 function restore() {
-	const json = localStorage.editorData;
+  const json = localStorage.editorData;
 
-	if (!json) {
-		return;
-	}
+  if (!json) {
+    return;
+  }
 
-	const data = JSON.parse(json);
+  const data = JSON.parse(json);
 
-	//console.log(data.arr);
-	//console.log(data.arr.length);
+  // console.log(data.arr);
+  // console.log(data.arr.length);
 
-	for (let i = 0; i < data.arr.length; i++) {
-		//console.log(data.arr[i]);
+  for (let i = 0; i < data.arr.length; i++) {
+    // console.log(data.arr[i]);
 
-		const li = document.createElement('li');
-		li.classList.add('post');
-		li.innerHTML = `
+    const li = document.createElement('li');
+    li.classList.add('post');
+    li.innerHTML = `
 		<div class="post-header">
 			<span class="date">${data.arr[i].day}.${data.arr[i].month}.${data.arr[i].year}</span>
 			<span class="time">${data.arr[i].hours}:${data.arr[i].minutes}</span>
@@ -52,49 +52,48 @@ function restore() {
 		<span class="geolocation">[${data.arr[i].latitude}, ${data.arr[i].longitude}]</span>
 		`;
 
-		postsList.prepend(li);
+    postsList.prepend(li);
 
-		posts.push(data.arr[i]);
-	}
+    posts.push(data.arr[i]);
+  }
 }
 
-window.onload = function() {
-	//console.log(posts);
-	restore();
+window.onload = function () {
+  // console.log(posts);
+  restore();
 };
 
-//!получаем геолокацию
+//! получаем геолокацию
 navigator.geolocation.getCurrentPosition(
-	function (position) {
-		latitude = position.coords.latitude;
-		longitude = position.coords.longitude;
-	},
-	function () {
-		errorModal.classList.add('showed');
+  (position) => {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+  },
+  () => {
+    errorModal.classList.add('showed');
 
-		cancelButton.addEventListener('click', () => {
-			errorModal.classList.remove('showed');
-		});
+    cancelButton.addEventListener('click', () => {
+      errorModal.classList.remove('showed');
+    });
 
-		form.addEventListener('submit', (e) => {
-			e.preventDefault();
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
 
-			if (inputLocation.value !== '') {
-				getUserGeolocation(inputLocation.value, inputLocation);
-			}
-		});
-	},
+      if (inputLocation.value !== '') {
+        getUserGeolocation(inputLocation.value, inputLocation);
+      }
+    });
+  },
 );
 
-//!добавляем новый пост
+//! добавляем новый пост
 document.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter' && inputText.value !== '') {
+    // console.log(inputText.value);
 
-	if (e.key === 'Enter' && inputText.value !== '') {
-		//console.log(inputText.value);
-
-		const li = document.createElement('li');
-		li.classList.add('post');
-		li.innerHTML = `
+    const li = document.createElement('li');
+    li.classList.add('post');
+    li.innerHTML = `
 		<div class="post-header">
 			<span class="date">${day}.${month}.${year}</span>
 			<span class="time">${hours}:${minutes}</span>
@@ -103,61 +102,61 @@ document.addEventListener('keyup', (e) => {
 		<span class="geolocation">[${latitude}, ${longitude}]</span>
 		`;
 
-		postsList.prepend(li);
+    postsList.prepend(li);
 
-		//!Серверную часть и загрузку также реализовывать не нужно, храните всё в памяти
-		posts.push({
-			day,
-			month,
-			year,
-			hours,
-			minutes,
-			text: inputText.value,
-			latitude,
-			longitude,
-		});
-		//console.log(posts);
+    //! Серверную часть и загрузку также реализовывать не нужно, храните всё в памяти
+    posts.push({
+      day,
+      month,
+      year,
+      hours,
+      minutes,
+      text: inputText.value,
+      latitude,
+      longitude,
+    });
+    // console.log(posts);
 
-		save(posts);
+    save(posts);
 
-		inputText.value = '';
-	}
+    inputText.value = '';
+  }
 });
 
 function showCorrectDate(number) {
-	if (number < 10) {
-		return `0${number}`;
-	}
+  if (number < 10) {
+    return `0${number}`;
+  }
 
-	return number;
+  return number;
 }
 
 //! пользовательский ввод геолокации
 export default function getUserGeolocation(str, input) {
-	const regex = /^(\[?-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?\]?)$/;
+  const regex = /^(\[?-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?\]?)$/;
 
-	const match = regex.exec(str);
+  const match = regex.exec(str);
 
-	if (match) {
-		if (match[1].startsWith('[')) {
-			match[1] = match[1].substring(1);
-		}
-		latitude = parseFloat(match[1]);
-		longitude = parseFloat(match[2]);
-		console.log(latitude, longitude);
+  if (match) {
+    if (match[1].startsWith('[')) {
+      match[1] = match[1].substring(1);
+    }
+    latitude = parseFloat(match[1]);
+    longitude = parseFloat(match[2]);
+    console.log(latitude, longitude);
 
-		errorModal.classList.remove('showed');
+    errorModal.classList.remove('showed');
 
-		console.log(form.checkValidity());
-	} else {
-		console.log('Invalid coordinates');
+    console.log(form.checkValidity());
+  } else {
+    console.log('Invalid coordinates');
 
-		input.setCustomValidity('Введите корректные координаты!');
+    input.setCustomValidity('Введите корректные координаты!');
 
-		input.classList.add('invalid');
+    input.classList.add('invalid');
 
-		errorMessage.classList.remove('hidden');
+    errorMessage.classList.remove('hidden');
 
-		console.log(form.checkValidity());
-	}
+    console.log(form.checkValidity());
+  }
 }
